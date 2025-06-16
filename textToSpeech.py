@@ -1,4 +1,8 @@
 import pymupdf
+import pyttsx3
+from pathlib import Path
+
+speech_engine = pyttsx3.init()
 
 def extract_selectable(pdf):
     '''
@@ -20,3 +24,19 @@ def extract_selectable(pdf):
         result += text_on_page
 
     return result
+
+def text_to_speech(text, path: str = "output.wav"):
+    '''
+    Takes in a string, then creates an audio file from the text
+
+    Args:
+        text (string): text to convert into an audio file
+        path (string): path to save audio file
+    
+    Returns:
+        output: absolute file path to audio file 
+    '''
+    speech_engine.save_to_file(text, path)
+    speech_engine.runAndWait()
+
+    return str(Path(path).resolve())
