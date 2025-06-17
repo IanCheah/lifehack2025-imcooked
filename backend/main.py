@@ -85,6 +85,9 @@ async def process_pdf_to_pdf(input_path: str, output_path: str, colour_val: int)
     
     processed_pages[0].save(output_path, save_all=True, append_images=processed_pages[1:])
 
+    for path in original_pages:
+        os.remove(path)
+
 async def convert_file(input_path: str, output_path: str, toSpeech: bool, toColour: bool, colour: str):
     ext = input_path.rsplit('.', -1)[-1].lower()
     colour_val = colour_to_int(colour)
