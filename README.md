@@ -24,10 +24,12 @@ python3 -m venv .venv
 source .venv/bin/activate # For MacOS
 .venv\Scripts\activate # For Windows
 # Install dependencies
-pip install requirements.txt
+cd backend
+pip install -r requirements.txt
 ```
 
 ## 3. Frontend setup
+From directory `lifehack2025-imcooked`:
 ```bash
 cd lifehack2025
 # Install dependencies
@@ -35,12 +37,14 @@ npm install
 ```
 
 ## 4. Start backend server
+From directory `lifehack2025-imcooked`:
 ```bash
 cd backend
 uvicorn main:app --reload
 ```
 
 ## 5. Start frontend server
+From directory `lifehack2025-imcooked`:
 ```bash
 cd lifehack2025
 npm run dev
