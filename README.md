@@ -1,8 +1,5 @@
-I'm cooked!
-
-Dataset used for training CNN model are taken from kaggle.
-https://www.kaggle.com/datasets/sakshivyavahare20/color-blindness-simulation-and-correction?resource=download
-
+# perceptron.ai
+## Perceptron is an AI-powered EdTech solution that makes educational materials accessible. It enhances visual content for the colour blind, and converts text to audio for the visually impaired.
 
 ### 🔁 Prerequisites
 
@@ -15,14 +12,12 @@ https://www.kaggle.com/datasets/sakshivyavahare20/color-blindness-simulation-and
 # 🚀 Setup
 
 ## 1. Clone repository
-```bash
-git clone https://github.com/IanCheah/lifehack2025-imcooked.git
-cd lifehack2025-imcooked
-```
+`git clone https://github.com/IanCheah/lifehack2025-imcooked.git`
 
 ## 2. Backend setup
 ```bash
- # Setup virtual environment
+cd lifehack2025-imcooked
+# Setup virtual environment
 python3 -m venv .venv
 # Activate virtual environment
 source .venv/bin/activate # For MacOS
@@ -32,9 +27,9 @@ pip install requirements.txt
 ```
 
 ## 3. Frontend setup
-Install dependencies:
 ```bash
 cd lifehack2025
+# Install dependencies
 npm install
 ```
 
@@ -49,3 +44,6 @@ uvicorn main:app --reload
 cd lifehack2025
 npm run dev
 ```
+
+# Credits
+[Dataset](https://www.kaggle.com/datasets/sakshivyavahare20/color-blindness-simulation-and-correction?resource=download) used for training CNN model are taken from kaggle.
