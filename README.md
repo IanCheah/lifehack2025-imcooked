@@ -21,20 +21,18 @@ cd lifehack2025-imcooked
 ```
 
 ## 2. Backend Setup
-Setup the virtual environment
+Setup the virtual environment:<br>
 `python3 -m venv .venv`
 
-Activate virtual environment (Mac)
-`source .venv/bin/activate`
+Activate virtual environment:<br>
+Mac: `source .venv/bin/activate`
+Windows: `.venv\Scripts\activate`
 
-Activate virtual environment (Windows)
-`.venv\Scripts\activate`
-
-Install dependencies
+Install dependencies:<br>
 `pip install requirements.txt`
 
 ## 3. Frontend Setup
-Install dependencies
+Install dependencies:
 ```bash
 cd lifehack2025
 npm install
