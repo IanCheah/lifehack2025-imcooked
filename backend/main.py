@@ -1,4 +1,3 @@
-from model_training import model as custom_model
 import textToSpeech as tts
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +9,8 @@ from PIL import Image
 from torchvision import transforms
 import torchvision.transforms.functional as TF
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import os
 import shutil
 
@@ -120,11 +121,38 @@ async def download_file():
         shutil.make_archive("converted_files", 'zip', CONVERTED_FOLDER)
         return FileResponse(zip_path, media_type='application/zip', filename='converted_files.zip')
 
+class ColorBlindnessCNN(nn.Module):
+    def __init__(self, num_classes = 3):
+        super().__init__()
+
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3 + num_classes, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.ReLU()
+        )
+        self.decoder = nn.Sequential(
+            nn.Conv2d(128, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(64, 3, kernel_size=3, padding=1), 
+            nn.Sigmoid()  
+        )
+
+    def forward(self, x, labels):
+        batch_size, _, h, w = x.size()
+        label_onehot = F.one_hot(labels, num_classes=3).float() 
+        label_maps = label_onehot.view(batch_size, 3, 1, 1).expand(-1, -1, h, w)
+        
+        x = torch.cat([x, label_maps], dim=1)  
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x
+    
 def run_inference(image_path: str, class_label: int, model_path: str, output_path: str):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Load model and weights
-    model = custom_model.ColorBlindnessCNN()
+    model = ColorBlindnessCNN()
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.to(device)
     model.eval()
