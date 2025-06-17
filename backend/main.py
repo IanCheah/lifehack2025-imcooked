@@ -34,6 +34,11 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {"pdf", "jpeg", "jpg", "txt"}
+colour_map = {
+        "protanopia": 0,
+        "deuteranopia": 1,
+        "tritanopia": 2,
+    }
 
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', -1)[-1].lower() in ALLOWED_EXTENSIONS
@@ -43,6 +48,9 @@ async def upload_file(file: UploadFile = File(...)):
     # Clear previous uploads
     shutil.rmtree(UPLOAD_FOLDER, ignore_errors=True)
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    # Clear previous conversions
+    shutil.rmtree(CONVERTED_FOLDER, ignore_errors=True)
+    os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
     if not allowed_file(file.filename):
         raise HTTPException(status_code=400, detail="Invalid file type")
@@ -56,8 +64,12 @@ async def upload_file(file: UploadFile = File(...)):
 class ConversionTypes(BaseModel):
     toSpeech: bool
     toColour: bool
+    colour: str
 
-async def process_pdf_to_pdf(input_path: str, output_path: str):
+def colour_to_int(colour: str) -> int:
+    return colour_map.get(colour.lower(), -1)  
+
+async def process_pdf_to_pdf(input_path: str, output_path: str, colour_val: int):
     original_pages = []
     pages = convert_from_path(input_path, dpi=850)
 
@@ -65,17 +77,17 @@ async def process_pdf_to_pdf(input_path: str, output_path: str):
         page_path = f"{output_path}_{count + 1}.jpg"
         page.save(page_path, "JPEG")
         original_pages.append(page_path)
+
     processed_pages = []
-    # for count, path in original_pages:
-    #     processed_pages[count] = run_inference(path, 0, "model_training/cnn_model.pth19", "")
     for path in original_pages:
-        processed_image = run_inference(path, 0, "model_training/cnn_model.pth19", "")
+        processed_image = run_inference(path, colour_val, "model_training/cnn_model.pth19")
         processed_pages.append(processed_image)
     
     processed_pages[0].save(output_path, save_all=True, append_images=processed_pages[1:])
 
-async def convert_file(input_path: str, output_path: str, toColour: bool, toSpeech: bool):
+async def convert_file(input_path: str, output_path: str, toSpeech: bool, toColour: bool, colour: str):
     ext = input_path.rsplit('.', -1)[-1].lower()
+    colour_val = colour_to_int(colour)
     if ext == "txt":
         # Convert text file to speech
         with open(input_path, 'r', encoding='utf-8') as f:
@@ -84,13 +96,13 @@ async def convert_file(input_path: str, output_path: str, toColour: bool, toSpee
         return
     
     if ext in {"jpeg", "jpg"}:
-        image = run_inference(input_path, 0, "model_training/cnn_model.pth19", output_path)
+        image = run_inference(input_path, colour_val, "model_training/cnn_model.pth19")
         image.save(output_path, "JPEG")
         return
     
     if toColour:
         # Convert PDF to JPG and then run inference
-        await process_pdf_to_pdf(input_path, output_path)
+        await process_pdf_to_pdf(input_path, output_path, colour_val)
     if toSpeech:
         # Convert PDF to text and then to speech
         text = tts.extract_selectable(input_path)
@@ -98,32 +110,32 @@ async def convert_file(input_path: str, output_path: str, toColour: bool, toSpee
 
 @app.post("/convert/")
 async def convert(data: ConversionTypes):
-    # Clear previous conversions
-    shutil.rmtree(CONVERTED_FOLDER, ignore_errors=True)
-    os.makedirs(CONVERTED_FOLDER, exist_ok=True)
-
     if not data.toSpeech and not data.toColour:
         raise HTTPException(status_code=400, detail="At least one conversion must be selected")
 
     converted_files = []
     for filename in os.listdir(UPLOAD_FOLDER):
         file_path = os.path.join(UPLOAD_FOLDER, filename)
-        file_ext = filename.rsplit('.', 1)[-1].lower()
+        #file_ext = filename.rsplit('.', 1)[-1].lower()
+        file_base, file_ext = os.path.splitext(filename)
+        
         converted_path = ""
         if file_ext == "pdf":
             if data.toColour:
-                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_converted.pdf")
-                await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
+                converted_path = os.path.join(CONVERTED_FOLDER, f"{file_base}_converted.pdf")
+                await convert_file(file_path, converted_path, False, data.toColour, data.colour)
+                converted_files.append(converted_path)
             if data.toSpeech:
-                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.wav")
-                await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
+                converted_path = os.path.join(CONVERTED_FOLDER, f"{file_base}_corrected.wav")
+                await convert_file(file_path, converted_path, data.toSpeech, False, data.colour)
+                converted_files.append(converted_path)
         elif file_ext in {"jpeg", "jpg"}:
-            converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.jpg")
-            await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
+            converted_path = os.path.join(CONVERTED_FOLDER, f"{file_base}_corrected.jpg")
+            await convert_file(file_path, converted_path, data.toSpeech, data.toColour, data.colour)
             converted_files.append(converted_path)
         else:
-            converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_converted.wav")
-            await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
+            converted_path = os.path.join(CONVERTED_FOLDER, f"{file_base}_converted.wav")
+            await convert_file(file_path, converted_path, data.toSpeech, data.toColour, data.colour)
             converted_files.append(converted_path)
     return {"message": "Files converted successfully", "converted_files": [os.path.basename(f) for f in converted_files]}
 
@@ -161,7 +173,7 @@ class ColorBlindnessCNN(nn.Module):
         x = self.decoder(x)
         return x
     
-def run_inference(image_path: str, class_label: int, model_path: str, output_path: str):
+def run_inference(image_path: str, class_label: int, model_path: str):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Load model and weights
