@@ -12,6 +12,7 @@ type ColorBlindType = "protanopia" | "deuteranopia" | "tritanopia"
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const [fileInputKey, setFileInputKey] = useState<number>(Date.now());
+    const [downloadButton, setDownloadButton] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleColorBlindType = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -86,6 +87,7 @@ type ColorBlindType = "protanopia" | "deuteranopia" | "tritanopia"
             colour: colorBlindType,
         });
         console.log(response.data);
+        setDownloadButton(true);
         } catch (error) {
             console.error(error);
         }
@@ -227,7 +229,7 @@ type ColorBlindType = "protanopia" | "deuteranopia" | "tritanopia"
             <button
                 className="submit-button"
                 onClick={handleDownload}
-                disabled={!pdfFile}
+                disabled={!downloadButton}
             >
                 Download
             </button>
