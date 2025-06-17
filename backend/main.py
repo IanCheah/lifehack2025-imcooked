@@ -185,7 +185,7 @@ def run_inference(image_path: str, class_label: int, model_path: str):
     # Prepare transform
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Resize((512, 512))
+        transforms.Resize((1024, 1024))
     ])
 
     # Load and transform input image
