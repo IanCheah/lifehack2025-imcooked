@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import type { ChangeEvent, FC, DragEvent } from 'react';
+import axios from 'axios';
 
 type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
 
@@ -40,9 +41,21 @@ const HomePage: FC = (): React.JSX.Element => {
         }
     }
 
-    const handlePdfUpload = (e: ChangeEvent<HTMLInputElement>): void => {
+    const handlePdfUpload = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
         if (e.target.files) {
             handleFile(e.target.files[0]);
+
+            const formData = new FormData();
+            formData.append("file", e.target.files[0]);
+
+            try {
+                const response = await axios.post("http://localhost:8000/upload/", formData, {
+                    headers: { "Content-Type": "multipart/form-data" }
+                });
+                    console.log(response.data);
+            } catch (error) {
+                console.error(error);
+            }
         }
     }
 
