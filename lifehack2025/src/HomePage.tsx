@@ -4,7 +4,7 @@ import axios from 'axios';
 
 type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
 
-const HomePage: FC = (): React.JSX.Element => {
+    const HomePage: FC = (): React.JSX.Element => {
     // States
     const [colorBlindType, setColorBlindType] = useState<ColorBlindType>("none");
     const [isColorBlind, setIsColorBlind] = useState<boolean>(false);
@@ -68,8 +68,41 @@ const HomePage: FC = (): React.JSX.Element => {
         }
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Submit logic here
+        try {
+            const response = await axios.post('http://localhost:8000/convert/', {
+            toSpeech: isSpeechEnabled,
+            toColour: isColorBlind
+        });
+        console.log(response.data);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const handleDownload = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/download/', {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'converted_files.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download failed:', error);
+        }
     }
 
     return (
@@ -179,6 +212,13 @@ const HomePage: FC = (): React.JSX.Element => {
                 disabled={!pdfFile}
             >
                 Convert Document
+            </button>
+
+            {/* Temporary download button */}
+            <button
+                onClick={handleDownload}
+            >
+                Download
             </button>
         </div>
     );

@@ -61,10 +61,11 @@ class ConversionTypes(BaseModel):
 
 async def process_pdf_to_pdf(input_path: str, output_path: str):
     original_pages = []
-    pages = convert_from_path(input_path, dpi=2000)
+    pages = convert_from_path(input_path, dpi=850)
+
     for count, page in enumerate(pages):
         page_path = f"{output_path}_{count + 1}.jpg"
-        page.save(page_path, "JPG")
+        page.save(page_path, "JPEG")
         original_pages.append(page_path)
     processed_pages = []
     # for count, path in original_pages:
@@ -114,10 +115,10 @@ async def convert(data: ConversionTypes):
         converted_path = ""
         if file_ext == "pdf":
             if data.toColour:
-                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_converted.wav")
+                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_converted.pdf")
                 await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
             if data.toSpeech:
-                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.pdf")
+                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.wav")
                 await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
         elif file_ext in {"jpeg", "jpg"}:
             converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.jpg")
