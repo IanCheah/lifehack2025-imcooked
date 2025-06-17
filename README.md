@@ -1,8 +1,7 @@
 # perceptron.ai
-## Perceptron is an AI-powered EdTech solution that makes educational materials accessible. It enhances visual content for the colour blind, and converts text to audio for the visually impaired.
+Perceptron is an AI-powered EdTech solution that makes educational materials accessible. It enhances visual content for the colour blind, and converts text to audio for the visually impaired.
 
-### 🔁 Prerequisites
-
+# 🔁 Prerequisites
 - Python 3.10+  
 - Node.js 16+ & npm/yarn  
 - `poppler-utils` (for `pdf2image`)  
@@ -12,7 +11,9 @@
 # 🚀 Setup
 
 ## 1. Clone repository
-`git clone https://github.com/IanCheah/lifehack2025-imcooked.git`
+```bash
+git clone https://github.com/IanCheah/lifehack2025-imcooked.git
+```
 
 ## 2. Backend setup
 ```bash
