@@ -224,6 +224,11 @@ body {
   cursor: not-allowed;
 }
 
+.info-message {
+  color: #aa0000;
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1.5rem;

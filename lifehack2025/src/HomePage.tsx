@@ -15,6 +15,8 @@ type ColorBlindType = "protanopia" | "deuteranopia" | "tritanopia"
     const [downloadButton, setDownloadButton] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const noOptionSelected = !isColorBlind && !isSpeechEnabled;
+
     const handleColorBlindType = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setColorBlindType(e.target.value as ColorBlindType);
     }
@@ -175,6 +177,13 @@ type ColorBlindType = "protanopia" | "deuteranopia" | "tritanopia"
                 <h3 className="upload-title">
                     Upload File
                 </h3>
+                {/* Info message when no checkboxes are selected */}
+                {noOptionSelected && (
+                    <p className="info-message">
+                        Please check at least one option to begin.
+                    </p>
+                )}
+
                 <div
                     className={`upload-area ${isDragging ? 'dragging' : ''}`}
                     onDrop={handleDrop}
@@ -191,6 +200,7 @@ type ColorBlindType = "protanopia" | "deuteranopia" | "tritanopia"
                         <button
                             className="upload-button"
                             onClick={() => fileInputRef.current?.click()}
+                            disabled={noOptionSelected}
                         >
                             Select PDF/JPG
                         </button>
@@ -220,7 +230,7 @@ type ColorBlindType = "protanopia" | "deuteranopia" | "tritanopia"
             <button
                 className="submit-button"
                 onClick={handleSubmit}
-                disabled={!pdfFile}
+                disabled={!pdfFile || noOptionSelected}
             >
                 Convert Document
             </button>
@@ -229,7 +239,7 @@ type ColorBlindType = "protanopia" | "deuteranopia" | "tritanopia"
             <button
                 className="submit-button"
                 onClick={handleDownload}
-                disabled={!downloadButton}
+                disabled={!downloadButton || noOptionSelected}
             >
                 Download
             </button>
