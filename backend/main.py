@@ -190,6 +190,7 @@ def run_inference(image_path: str, class_label: int, model_path: str):
 
     # Load and transform input image
     img = Image.open(image_path).convert("RGB")
+    size = img.size
     img_tensor = transform(img).unsqueeze(0).to(device) # add batch dimension
 
     # Prepare label tensor
@@ -201,6 +202,7 @@ def run_inference(image_path: str, class_label: int, model_path: str):
 
     # Convert output to PIL image
     output_img = TF.to_pil_image(output.squeeze(0).cpu())
+    output_img = output_img.resize(size, Image.BICUBIC)
 
     # Save output image
     # os.makedirs(os.path.dirname(output_path), exist_ok=True)
