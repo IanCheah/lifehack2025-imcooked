@@ -14,24 +14,24 @@ https://www.kaggle.com/datasets/sakshivyavahare20/color-blindness-simulation-and
 
 # 🚀 Setup
 
-## 1. Clone the repo
+## 1. Clone repository
 ```bash
 git clone https://github.com/IanCheah/lifehack2025-imcooked.git
 cd lifehack2025-imcooked
 ```
 
-## 2. Backend Setup
-Setup the virtual environment:<br>
-`python3 -m venv .venv`
+## 2. Backend setup
+```bash
+ # Setup virtual environment
+python3 -m venv .venv
+# Activate virtual environment
+source .venv/bin/activate # For MacOS
+.venv\Scripts\activate # For Windows
+# Install dependencies
+pip install requirements.txt
+```
 
-Activate virtual environment:<br>
-Mac: `source .venv/bin/activate`
-Windows: `.venv\Scripts\activate`
-
-Install dependencies:<br>
-`pip install requirements.txt`
-
-## 3. Frontend Setup
+## 3. Frontend setup
 Install dependencies:
 ```bash
 cd lifehack2025
