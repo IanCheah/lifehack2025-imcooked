@@ -61,17 +61,21 @@ class ConversionTypes(BaseModel):
 
 async def process_pdf_to_pdf(input_path: str, output_path: str):
     original_pages = []
-    pages = convert_from_path(input_path, dpi=200)
+    pages = convert_from_path(input_path, dpi=2000)
     for count, page in enumerate(pages):
         page_path = f"{output_path}_{count + 1}.jpg"
         page.save(page_path, "JPG")
         original_pages.append(page_path)
     processed_pages = []
-    for count, path in original_pages:
-        processed_pages[count] = run_inference(path, 0, "model_training/cnn_model.pth19", "")
+    # for count, path in original_pages:
+    #     processed_pages[count] = run_inference(path, 0, "model_training/cnn_model.pth19", "")
+    for path in original_pages:
+        processed_image = run_inference(path, 0, "model_training/cnn_model.pth19", "")
+        processed_pages.append(processed_image)
+    
     processed_pages[0].save(output_path, save_all=True, append_images=processed_pages[1:])
 
-async def convert_file(input_path: str, output_path: str, toColour: bool):
+async def convert_file(input_path: str, output_path: str, toColour: bool, toSpeech: bool):
     ext = input_path.rsplit('.', -1)[-1].lower()
     if ext == "txt":
         # Convert text file to speech
@@ -88,13 +92,19 @@ async def convert_file(input_path: str, output_path: str, toColour: bool):
     if toColour:
         # Convert PDF to JPG and then run inference
         await process_pdf_to_pdf(input_path, output_path)
-    else:
+    if toSpeech:
         # Convert PDF to text and then to speech
         text = tts.extract_selectable(input_path)
         tts.text_to_speech(text, output_path)
 
-@app.get("/convert/")
+@app.post("/convert/")
 async def convert(data: ConversionTypes):
+    # Clear previous conversions
+    for filename in os.listdir(CONVERTED_FOLDER):
+        file_path = os.path.join(CONVERTED_FOLDER, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+
     if not data.toSpeech and not data.toColour:
         raise HTTPException(status_code=400, detail="At least one conversion must be selected")
 
@@ -104,14 +114,17 @@ async def convert(data: ConversionTypes):
         converted_path = ""
         if file_ext == "pdf":
             if data.toColour:
-                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.pdf")
-            else:
                 converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_converted.wav")
+                await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
+            if data.toSpeech:
+                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.pdf")
+                await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
         elif file_ext in {"jpeg", "jpg"}:
             converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.jpg")
+            await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
         else:
             converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_converted.wav")
-        await convert_file(file_path, converted_path, data.toColour)
+            await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
     return {"message": "Files converted successfully", "converted_files": os.listdir(CONVERTED_FOLDER)}
 
 @app.get("/download/")
