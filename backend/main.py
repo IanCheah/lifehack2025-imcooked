@@ -16,10 +16,12 @@ import shutil
 
 app = FastAPI()
 
+# Define frontend URL for CORS
 origins = [
-    "http://localhost:5173", # Replace with frontend URL
+    "http://localhost:5173",
 ]
 
+# CORS middleware configuration for the FastAPI app to allow requests from the frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -40,9 +42,11 @@ colour_map = {
         "tritanopia": 2,
     }
 
+# Check if the file has an allowed extension
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', -1)[-1].lower() in ALLOWED_EXTENSIONS
 
+# Endpoint to upload a file
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
     # Clear previous uploads
@@ -61,6 +65,7 @@ async def upload_file(file: UploadFile = File(...)):
 
     return {"filename": file.filename}
 
+# Pydantic model for conversion types
 class ConversionTypes(BaseModel):
     toSpeech: bool
     toColour: bool
@@ -71,20 +76,26 @@ def colour_to_int(colour: str) -> int:
 
 async def process_pdf_to_pdf(input_path: str, output_path: str, colour_val: int):
     original_pages = []
+
+    # Convert PDF to images
     pages = convert_from_path(input_path, dpi=850)
 
+    # Save each page as a JPEG image
     for count, page in enumerate(pages):
         page_path = f"{output_path}_{count + 1}.jpg"
         page.save(page_path, "JPEG")
         original_pages.append(page_path)
 
+    # Process each image with the model
     processed_pages = []
     for path in original_pages:
         processed_image = run_inference(path, colour_val, "model_training/cnn_model.pth19")
         processed_pages.append(processed_image)
     
+    # Save processed images as a single PDF
     processed_pages[0].save(output_path, save_all=True, append_images=processed_pages[1:])
 
+    # Clean up original images
     for path in original_pages:
         os.remove(path)
 
@@ -99,6 +110,7 @@ async def convert_file(input_path: str, output_path: str, toSpeech: bool, toColo
         return
     
     if ext in {"jpeg", "jpg"}:
+        # Convert image to colour blindness corrected image
         image = run_inference(input_path, colour_val, "model_training/cnn_model.pth19")
         image.save(output_path, "JPEG")
         return
