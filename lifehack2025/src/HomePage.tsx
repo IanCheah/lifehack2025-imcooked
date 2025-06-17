@@ -2,11 +2,11 @@ import React, { useState, useRef } from 'react';
 import type { ChangeEvent, FC, DragEvent } from 'react';
 import axios from 'axios';
 
-type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
+type ColorBlindType = "protanopia" | "deuteranopia" | "tritanopia"
 
     const HomePage: FC = (): React.JSX.Element => {
     // States
-    const [colorBlindType, setColorBlindType] = useState<ColorBlindType>("none");
+    const [colorBlindType, setColorBlindType] = useState<ColorBlindType>("protanopia");
     const [isColorBlind, setIsColorBlind] = useState<boolean>(false);
     const [isSpeechEnabled, setIsSpeechEnabled] = useState<boolean>(false);
     const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -19,12 +19,7 @@ type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
     }
 
     const handleIsColorBlind = (): void => {
-        setIsColorBlind(prev => {
-            if (prev) {
-                setColorBlindType("none");
-            }
-            return !prev;
-        });
+        setIsColorBlind(prev => !prev);
     }
 
     const handleIsSpeechEnabled = (): void => {
@@ -87,7 +82,8 @@ type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
         try {
             const response = await axios.post('http://localhost:8000/convert/', {
             toSpeech: isSpeechEnabled,
-            toColour: isColorBlind
+            toColour: isColorBlind,
+            colour: colorBlindType,
         });
         console.log(response.data);
         } catch (error) {
@@ -164,7 +160,6 @@ type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
                             className="dropdown-select"
                         >
                             <option disabled value="">-- Select --</option>
-                            <option value="none">None</option>
                             <option value="protanopia">Protanopia (Red-Blind)</option>
                             <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
                             <option value="tritanopia">Tritanopia (Blue-Blind)</option>
@@ -176,7 +171,7 @@ type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
             {/* pdf upload */}
             <div className="upload-section">
                 <h3 className="upload-title">
-                    Upload PDF File
+                    Upload File
                 </h3>
                 <div
                     className={`upload-area ${isDragging ? 'dragging' : ''}`}
@@ -195,9 +190,9 @@ type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
                             className="upload-button"
                             onClick={() => fileInputRef.current?.click()}
                         >
-                            Select PDF
+                            Select PDF/JPG
                         </button>
-                        <p className="upload-text">or drag and drop a PDF in the box</p>
+                        <p className="upload-text">or drag and drop a PDF/JPG in the box</p>
                         <input
                             key={fileInputKey}
                             type="file"
@@ -230,7 +225,9 @@ type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
 
             {/* Temporary download button */}
             <button
+                className="submit-button"
                 onClick={handleDownload}
+                disabled={!pdfFile}
             >
                 Download
             </button>

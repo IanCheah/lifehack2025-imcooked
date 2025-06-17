@@ -116,8 +116,8 @@ async def convert(data: ConversionTypes):
     converted_files = []
     for filename in os.listdir(UPLOAD_FOLDER):
         file_path = os.path.join(UPLOAD_FOLDER, filename)
-        #file_ext = filename.rsplit('.', 1)[-1].lower()
-        file_base, file_ext = os.path.splitext(filename)
+        file_ext = filename.rsplit('.', 1)[-1].lower()
+        file_base, _ = os.path.splitext(filename)
         
         converted_path = ""
         if file_ext == "pdf":
