@@ -32,13 +32,17 @@ type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
     }
 
     const handleFile = (file: File): void => {
-        if (file.type === "application/pdf") {
-            setPdfFile(file);
-            setFileInputKey(Date.now());
-            alert("Upload successful")
-        } else {
-            alert("Please upload a valid PDF file.");
-        }
+        // if (file.type === "application/pdf") {
+        //     setPdfFile(file);
+        //     setFileInputKey(Date.now());
+        //     alert("Upload successful");
+        // } else {
+        //     alert("Please upload a valid PDF file.");
+        // }
+
+        setPdfFile(file);
+        setFileInputKey(Date.now());
+        alert("Upload successful");
     }
 
     const handlePdfUpload = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -59,12 +63,22 @@ type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
         }
     }
 
-    const handleDrop = (e: DragEvent<HTMLDivElement>): void => {
+    const handleDrop = async (e: DragEvent<HTMLDivElement>): Promise<void> => {
         e.preventDefault();
         setIsDragging(false);
 
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
             handleFile(e.dataTransfer.files[0]);
+            const formData = new FormData();
+            formData.append("file", e.dataTransfer.files[0]);
+            try {
+                const response = await axios.post("http://localhost:8000/upload/", formData, {
+                    headers: { "Content-Type": "multipart/form-data" }
+                });
+                    console.log(response.data);
+            } catch (error) {
+                console.error(error);
+            }
         }
     }
 
@@ -187,7 +201,7 @@ type ColorBlindType = "none" | "protanopia" | "deuteranopia" | "tritanopia"
                         <input
                             key={fileInputKey}
                             type="file"
-                            accept="application/pdf"
+                            // accept="application/pdf"
                             onChange={handlePdfUpload}
                             ref={fileInputRef}
                             className="upload-input"

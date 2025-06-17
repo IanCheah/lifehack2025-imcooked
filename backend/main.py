@@ -105,10 +105,10 @@ async def convert(data: ConversionTypes):
     if not data.toSpeech and not data.toColour:
         raise HTTPException(status_code=400, detail="At least one conversion must be selected")
 
+    converted_files = []
     for filename in os.listdir(UPLOAD_FOLDER):
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         file_ext = filename.rsplit('.', 1)[-1].lower()
-        converted_files = []
         converted_path = ""
         if file_ext == "pdf":
             if data.toColour:
