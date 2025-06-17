@@ -46,5 +46,5 @@ cd lifehack2025
 npm run dev
 ```
 
-# Credits
+# 🤝 Credits
 [Dataset](https://www.kaggle.com/datasets/sakshivyavahare20/color-blindness-simulation-and-correction?resource=download) used for training CNN model are taken from kaggle.
