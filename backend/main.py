@@ -41,10 +41,8 @@ def allowed_file(filename: str) -> bool:
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
     # Clear previous uploads
-    for filename in os.listdir(UPLOAD_FOLDER):
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
+    shutil.rmtree(UPLOAD_FOLDER, ignore_errors=True)
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
     if not allowed_file(file.filename):
         raise HTTPException(status_code=400, detail="Invalid file type")
@@ -100,10 +98,8 @@ async def convert_file(input_path: str, output_path: str, toColour: bool, toSpee
 @app.post("/convert/")
 async def convert(data: ConversionTypes):
     # Clear previous conversions
-    for filename in os.listdir(CONVERTED_FOLDER):
-        file_path = os.path.join(CONVERTED_FOLDER, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
+    shutil.rmtree(CONVERTED_FOLDER, ignore_errors=True)
+    os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
     if not data.toSpeech and not data.toColour:
         raise HTTPException(status_code=400, detail="At least one conversion must be selected")
@@ -111,21 +107,26 @@ async def convert(data: ConversionTypes):
     for filename in os.listdir(UPLOAD_FOLDER):
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         file_ext = filename.rsplit('.', 1)[-1].lower()
+        converted_files = []
         converted_path = ""
         if file_ext == "pdf":
             if data.toColour:
-                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_converted.wav")
-                await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
+                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_converted.pdf")
+                await convert_file(file_path, converted_path, data.toColour, False)
+                converted_files.append(converted_path)
             if data.toSpeech:
-                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.pdf")
-                await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
+                converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.wav")
+                await convert_file(file_path, converted_path, False, data.toSpeech)
+                converted_files.append(converted_path)
         elif file_ext in {"jpeg", "jpg"}:
             converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_corrected.jpg")
             await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
+            converted_files.append(converted_path)
         else:
             converted_path = os.path.join(CONVERTED_FOLDER, f"{filename}_converted.wav")
             await convert_file(file_path, converted_path, data.toColour, data.toSpeech)
-    return {"message": "Files converted successfully", "converted_files": os.listdir(CONVERTED_FOLDER)}
+            converted_files.append(converted_path)
+    return {"message": "Files converted successfully", "converted_files": [os.path.basename(f) for f in converted_files]}
 
 @app.get("/download/")
 async def download_file():
