@@ -4,7 +4,7 @@ Perceptron is an AI-powered EdTech solution that makes educational materials acc
 # 🔁 Prerequisites
 - Python 3.10+  
 - Node.js 16+ & npm/yarn  
-- `poppler-utils` (for `pdf2image`)  
+- `poppler-utils` (for `pdf2image`) - follow instructions [here](https://pdf2image.readthedocs.io/en/latest/installation.html)
   - Ubuntu/debian: `sudo apt install poppler-utils`  
   - macOS (Homebrew): `brew install poppler`
 
