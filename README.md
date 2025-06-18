@@ -53,7 +53,8 @@ npm run dev
 ```
 
 ## 3. Navigate to UI
-Open http://localhost:5713/ to view this [page](pics/ui.jpg)
+Open http://localhost:5713/ to use the converter.
+![UI](pics/ui.jpg)
 
 # 🤝 Credits
 [Dataset](https://www.kaggle.com/datasets/sakshivyavahare20/color-blindness-simulation-and-correction?resource=download) used for training CNN model are taken from kaggle.
