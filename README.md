@@ -44,6 +44,7 @@ From directory `lifehack2025-imcooked`:
 cd backend
 uvicorn main:app --reload
 ```
+Wait until `Application startup complete.` is shown.
 
 ## 2. Start frontend server
 From directory `lifehack2025-imcooked`:
