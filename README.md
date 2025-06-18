@@ -36,19 +36,24 @@ cd lifehack2025
 npm install
 ```
 
-## 4. Start backend server
+# 💻 Usage
+
+## 1. Start backend server
 From directory `lifehack2025-imcooked`:
 ```bash
 cd backend
 uvicorn main:app --reload
 ```
 
-## 5. Start frontend server
+## 2. Start frontend server
 From directory `lifehack2025-imcooked`:
 ```bash
 cd lifehack2025
 npm run dev
 ```
+
+## 3. Navigate to UI
+Open http://localhost:5713/ to view this [page](pics/ui.jpg)
 
 # 🤝 Credits
 [Dataset](https://www.kaggle.com/datasets/sakshivyavahare20/color-blindness-simulation-and-correction?resource=download) used for training CNN model are taken from kaggle.
